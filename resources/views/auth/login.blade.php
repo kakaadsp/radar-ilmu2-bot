@@ -186,14 +186,15 @@
                         <div class="input-wrap">
                             <input
                                 type="email" id="email" name="email"
-                                placeholder="nama@upnjatim.ac.id"
+                                placeholder="24082010xxx@student.upnjatim.ac.id"
                                 class="input-field"
                                 autocomplete="email"
                                 required
                             >
                         </div>
-                        <p id="emailErr" class="hidden text-red-400 text-xs mt-1.5">Email harus menggunakan domain @upnjatim.ac.id</p>
+                        <p id="emailErr" class="hidden text-red-400 text-xs mt-1.5">Gunakan email UPN Jatim (@student.upnjatim.ac.id atau @upnjatim.ac.id)</p>
                     </div>
+
 
                     <!-- Password -->
                     <div>
@@ -289,10 +290,15 @@
         const emailInput= document.getElementById('email');
         const emailErr  = document.getElementById('emailErr');
 
+        function isUpnEmail(email) {
+            const val = email.toLowerCase().trim();
+            return val.endsWith('@upnjatim.ac.id') || val.endsWith('@student.upnjatim.ac.id');
+        }
+
         // Live email validation
         emailInput.addEventListener('blur', () => {
             const val = emailInput.value.trim();
-            const ok  = val.endsWith('@upnjatim.ac.id') || val === '';
+            const ok  = isUpnEmail(val) || val === '';
             emailErr.classList.toggle('hidden', ok);
             emailInput.classList.toggle('error', !ok && val !== '');
         });
@@ -303,7 +309,7 @@
 
             // Validate email domain
             const email = emailInput.value.trim();
-            if (!email.endsWith('@upnjatim.ac.id')) {
+            if (!isUpnEmail(email)) {
                 emailErr.classList.remove('hidden');
                 emailInput.classList.add('error');
                 emailInput.focus();

@@ -20,10 +20,47 @@ class MoodleService
     /**
      * Fetch a Moodle token using student credentials.
      * Password is NEVER stored — it is only used in this one call.
+     * Tries the exact input first, then tries NPM/username fallback if token fetch fails.
      *
      * @throws \Exception
      */
     public function fetchToken(string $username, string $password): string
+    {
+        $username = trim($username);
+
+        // Attempt 1: Try exact input as entered by user
+        try {
+            return $this->requestToken($username, $password);
+        } catch (\Exception $e1) {
+            // Attempt 2: If full email was provided, try NPM prefix only (part before @)
+            if (str_contains($username, '@')) {
+                $npm = explode('@', $username)[0];
+                try {
+                    return $this->requestToken($npm, $password);
+                } catch (\Exception $e2) {
+                    throw $e1; // throw original error if fallback also fails
+                }
+            }
+
+            // Attempt 3: If NPM prefix only was provided, try appending @student.upnjatim.ac.id
+            if (!str_contains($username, '@')) {
+                try {
+                    return $this->requestToken($username . '@student.upnjatim.ac.id', $password);
+                } catch (\Exception $e3) {
+                    throw $e1;
+                }
+            }
+
+            throw $e1;
+        }
+    }
+
+    /**
+     * Make raw HTTP call to Moodle token API.
+     *
+     * @throws \Exception
+     */
+    private function requestToken(string $username, string $password): string
     {
         try {
             $response = Http::timeout(15)

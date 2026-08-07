@@ -36,10 +36,13 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => ['required', 'email', 'ends_with:upnjatim.ac.id'],
-            'password' => ['required', 'min:6'],
-        ], [
-            'email.ends_with' => 'Gunakan email UPN Jatim kamu (@upnjatim.ac.id).',
+            'email'    => ['required', 'email', function ($attr, $value, $fail) {
+                $val = strtolower(trim($value));
+                if (!str_ends_with($val, '@upnjatim.ac.id') && !str_ends_with($val, '@student.upnjatim.ac.id')) {
+                    $fail('Gunakan email UPN Jatim kamu (@student.upnjatim.ac.id atau @upnjatim.ac.id).');
+                }
+            }],
+            'password' => ['required', 'min:4'],
         ]);
 
         try {
