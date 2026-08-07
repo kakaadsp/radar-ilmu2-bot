@@ -86,8 +86,17 @@ COPY . .
 # ── Copy pre-built frontend assets from node-builder stage ────────────────────
 COPY --from=node-builder /app/public/build ./public/build
 
-# Run post-install scripts (package:discover, etc.)
-RUN composer run-script post-autoload-dump
+# ── Run artisan package:discover (needs APP_KEY to bootstrap Laravel) ──────────
+# Create a temporary .env ONLY for build time — real secrets come from Render env vars
+RUN echo "APP_NAME=RadarIlmu2" > .env \
+    && echo "APP_ENV=production" >> .env \
+    && echo "APP_KEY=base64:dmFsaWQtYXBwLWtleS1mb3ItZG9ja2VyLWJ1aWxkLW9ubHk=" >> .env \
+    && echo "APP_DEBUG=false" >> .env \
+    && echo "DB_CONNECTION=pgsql" >> .env \
+    && echo "LOG_CHANNEL=stderr" >> .env \
+    && composer dump-autoload --optimize \
+    && php artisan package:discover --ansi \
+    && rm .env
 
 # ── Permissions: www-data must own storage & cache ────────────────────────────
 RUN chown -R www-data:www-data /var/www/html \
