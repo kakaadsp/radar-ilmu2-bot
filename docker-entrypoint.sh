@@ -22,21 +22,34 @@ php artisan view:cache
 echo "→ Running database migrations..."
 MAX_RETRIES=5
 COUNT=0
+MIGRATE_OK=false
 
 until php artisan migrate --force 2>&1; do
     COUNT=$((COUNT + 1))
     if [ "$COUNT" -ge "$MAX_RETRIES" ]; then
-        echo "❌ Migration gagal setelah $MAX_RETRIES percobaan."
-        echo "   Pastikan DB_HOST menggunakan Supabase Connection Pooler (IPv4),"
-        echo "   bukan direct connection (IPv6) yang tidak bisa diakses Render."
-        exit 1
+        echo "⚠️  WARNING: Migration gagal setelah $MAX_RETRIES percobaan."
+        echo "   Server tetap akan dijalankan, tapi fitur DB tidak akan bekerja."
+        echo ""
+        echo "   ─── FIX YANG DIPERLUKAN ───────────────────────────────────"
+        echo "   Render tidak bisa akses IPv6 (Supabase direct connection)."
+        echo "   Ganti env vars di Render dashboard:"
+        echo "   DB_HOST    = aws-0-[REGION].pooler.supabase.com"
+        echo "   DB_USERNAME= postgres.sumjwjzcxfrvwfeqyvnw"
+        echo "   DB_PORT    = 5432"
+        echo "   ────────────────────────────────────────────────────────────"
+        MIGRATE_OK=false
+        break
     fi
-    echo "  ⟳ Percobaan $COUNT/$MAX_RETRIES gagal, coba lagi dalam 5 detik..."
-    sleep 5
+    echo "  ⟳ Percobaan $COUNT/$MAX_RETRIES gagal, retry dalam 3 detik..."
+    sleep 3
 done
 
+if [ "$MIGRATE_OK" != "false" ]; then
+    echo "✅ Migration berhasil!"
+fi
+
 echo "============================================"
-echo " ✅ Startup complete. Launching Apache..."
+echo " Launching Apache... (DB status: see above)"
 echo "============================================"
 
 exec "$@"
