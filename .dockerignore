@@ -27,10 +27,10 @@ Thumbs.db
 .php-cs-fixer.cache
 .phpunit.result.cache
 
-# Docker files themselves (no inception)
+# Docker files themselves (not needed inside the container)
 Dockerfile
-docker-entrypoint.sh
 docker-compose*.yml
+# NOTE: docker-entrypoint.sh is intentionally NOT excluded — Dockerfile needs to COPY it
 
 # Render config (not needed inside container)
 render.yaml
