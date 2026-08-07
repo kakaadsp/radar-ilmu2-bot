@@ -86,17 +86,10 @@ COPY . .
 # ── Copy pre-built frontend assets from node-builder stage ────────────────────
 COPY --from=node-builder /app/public/build ./public/build
 
-# ── Run artisan package:discover (needs APP_KEY to bootstrap Laravel) ──────────
-# Create a temporary .env ONLY for build time — real secrets come from Render env vars
-RUN echo "APP_NAME=RadarIlmu2" > .env \
-    && echo "APP_ENV=production" >> .env \
-    && echo "APP_KEY=base64:dmFsaWQtYXBwLWtleS1mb3ItZG9ja2VyLWJ1aWxkLW9ubHk=" >> .env \
-    && echo "APP_DEBUG=false" >> .env \
-    && echo "DB_CONNECTION=pgsql" >> .env \
-    && echo "LOG_CHANNEL=stderr" >> .env \
-    && composer dump-autoload --optimize \
-    && php artisan package:discover --ansi \
-    && rm .env
+# ── Regenerate autoloader only — NO artisan commands at build time ─────────────
+# artisan needs real env vars (APP_KEY, DB, etc.) which only exist at runtime.
+# package:discover, config:cache, migrate, etc. all run in docker-entrypoint.sh
+RUN composer dump-autoload --optimize --no-scripts
 
 # ── Permissions: www-data must own storage & cache ────────────────────────────
 RUN chown -R www-data:www-data /var/www/html \

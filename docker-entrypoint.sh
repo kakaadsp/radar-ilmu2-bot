@@ -5,7 +5,10 @@ echo "============================================"
 echo " Radar Ilmu 2 Bot — Starting up..."
 echo "============================================"
 
-# ── Laravel Bootstrap ──────────────────────────────────────────────────────────
+# ── Laravel Bootstrap (runs with real Render env vars) ────────────────────────
+echo "→ Discovering packages..."
+php artisan package:discover --ansi
+
 echo "→ Caching config..."
 php artisan config:cache
 
