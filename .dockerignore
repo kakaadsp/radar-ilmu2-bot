@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Local env (NEVER include in Docker image)
+.env
+.env.local
+.env.*.local
+
+# Node modules (rebuilt in Docker via multi-stage)
+node_modules
+
+# Dev & testing files
+tests
+phpunit.xml
+*.test.js
+
+# Editor / OS files
+.editorconfig
+.vscode
+.idea
+*.DS_Store
+Thumbs.db
+
+# Laravel dev tools (not needed in production)
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# Docker files themselves (no inception)
+Dockerfile
+docker-entrypoint.sh
+docker-compose*.yml
+
+# Render config (not needed inside container)
+render.yaml
+Procfile
+
+# README
+README.md

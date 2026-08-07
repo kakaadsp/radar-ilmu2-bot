@@ -1,15 +1,9 @@
 services:
   - type: web
     name: radar-ilmu2-bot
-    env: php
+    env: docker
     plan: free
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader &&
-      php artisan config:cache &&
-      php artisan route:cache &&
-      php artisan view:cache &&
-      php artisan migrate --force
-    startCommand: vendor/bin/heroku-php-apache2 public/
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /
     envVars:
       - key: APP_NAME
@@ -18,10 +12,6 @@ services:
         value: production
       - key: APP_DEBUG
         value: "false"
-      - key: APP_KEY
-        generateValue: false   # Set manually in Render dashboard
-      - key: APP_URL
-        value: https://radar-ilmu2-bot.onrender.com  # Update after deploy
       - key: APP_LOCALE
         value: id
       - key: APP_FALLBACK_LOCALE
@@ -40,8 +30,6 @@ services:
         value: postgres
       - key: DB_USERNAME
         value: postgres
-      - key: DB_PASSWORD
-        generateValue: false   # Set manually in Render dashboard
       - key: DB_SSLMODE
         value: require
       - key: SESSION_DRIVER
@@ -58,7 +46,10 @@ services:
         value: "7"
       - key: SUBSCRIPTION_PRICE
         value: "5000"
-      # ── Sensitive keys: set manually in Render dashboard ──────────────────
+      # ── Set these manually in Render dashboard (never commit secrets to Git) ──
+      # APP_KEY
+      # APP_URL                  (set after first deploy to get your .onrender.com URL)
+      # DB_PASSWORD
       # TELEGRAM_BOT_TOKEN
       # TELEGRAM_BOT_USERNAME
       # TELEGRAM_ADMIN_CHAT_ID
