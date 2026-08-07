@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\TelegramWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,3 +17,7 @@ Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard'
 // ─── Telegram Webhook (no CSRF) ───────────────────────────────────────────────
 Route::post('/webhook/telegram', [TelegramWebhookController::class, 'handle'])
     ->name('telegram.webhook');
+
+// ─── Cron Reminder Endpoint (no CSRF, secured by token query param) ───────────
+Route::get('/api/send-reminders', [ReminderController::class, 'sendReminders'])
+    ->name('cron.reminders');

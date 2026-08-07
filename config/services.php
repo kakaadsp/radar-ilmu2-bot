@@ -49,4 +49,9 @@ return [
         'service'  => env('MOODLE_SERVICE', 'moodle_mobile_app'),
     ],
 
+    // ─── Cron Job Security ────────────────────────────────────────────────────
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
 ];

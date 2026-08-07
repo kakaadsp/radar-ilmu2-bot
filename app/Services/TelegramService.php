@@ -150,6 +150,28 @@ class TelegramService
     }
 
     /**
+     * Send H-3 reminder.
+     */
+    public function sendH3Alert(\App\Models\User $user, \App\Models\TaskReminder $task): void
+    {
+        $deadline = $task->deadline->locale('id')->isoFormat('dddd, D MMMM YYYY (HH:mm)');
+
+        $text = "⏰ <b>DEADLINE 3 HARI LAGI! (H-3)</b> ⏰\n\n"
+              . "Halo <b>{$user->name}</b>! Masih ada waktu, tapi jangan ditunda ya:\n\n"
+              . "📚 <b>Mata Kuliah:</b> {$task->course_fullname}\n"
+              . "📝 <b>Tugas:</b> {$task->task_name}\n"
+              . "🗓 <b>Deadline:</b> {$deadline} WIB\n"
+              . "⏳ <b>Sisa Waktu:</b> 3 Hari lagi\n\n"
+              . "Gas kerjain sekarang biar nggak panik H-1! 💪🔥";
+
+        $keyboard = $this->inlineKeyboard([[
+            ['text' => '📖 Buka Tugas di Ilmu 2', 'url' => $task->moodle_url ?? 'https://ilmu2.upnjatim.ac.id'],
+        ]]);
+
+        $this->sendMessage($user->telegram_chat_id, $text, ['reply_markup' => $keyboard]);
+    }
+
+    /**
      * Send H-1 urgent reminder.
      */
     public function sendH1Alert(\App\Models\User $user, \App\Models\TaskReminder $task): void

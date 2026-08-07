@@ -30,7 +30,7 @@ class MoodleCheckCommand extends Command
             foreach ($users as $user) {
                 $this->processUser($user);
                 // Polite delay to avoid hammering Moodle server
-                usleep(500_000); // 0.5 second between requests
+                usleep(200_000); // 0.2s per user × 50 = 10s total (safe for Render 30s timeout)
             }
         });
 
