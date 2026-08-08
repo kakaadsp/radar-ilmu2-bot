@@ -198,6 +198,13 @@ class TelegramService
      */
     public function notifyAdminPayment(\App\Models\User $user, string $fileId, int $paymentId): void
     {
+        Log::info('Notifying admin about payment', [
+            'admin_chat_id' => $this->adminChatId,
+            'user_id'       => $user->id,
+            'payment_id'    => $paymentId,
+            'file_id'       => $fileId,
+        ]);
+
         $keyboard = $this->inlineKeyboard([[
             ['text' => '✅ Approve', 'callback_data' => "approve_payment:{$paymentId}"],
             ['text' => '❌ Reject',  'callback_data' => "reject_payment:{$paymentId}"],
@@ -210,7 +217,18 @@ class TelegramService
                  . "🆔 <b>User ID:</b> {$user->id}\n\n"
                  . "Cek GoPay Merchant-mu, lalu klik tombol di bawah untuk memverifikasi!";
 
-        $this->forwardPhotoByFileId($this->adminChatId, $fileId, $caption, ['reply_markup' => $keyboard]);
+        $result = $this->forwardPhotoByFileId($this->adminChatId, $fileId, $caption, ['reply_markup' => $keyboard]);
+
+        if (!$result || !($result['ok'] ?? false)) {
+            Log::error('Failed to notify admin about payment', [
+                'admin_chat_id' => $this->adminChatId,
+                'payment_id'    => $paymentId,
+                'telegram_error'=> $result['description'] ?? 'unknown error',
+                'response'      => $result,
+            ]);
+        } else {
+            Log::info('Admin notified successfully about payment', ['payment_id' => $paymentId]);
+        }
     }
 
     // ─── Raw API Call ─────────────────────────────────────────────────────────
@@ -219,9 +237,20 @@ class TelegramService
     {
         try {
             $response = Http::timeout(10)->post("{$this->baseUrl}/{$method}", $params);
-            return $response->json();
+            $json = $response->json();
+
+            // Log any failed API responses (ok: false)
+            if (!($json['ok'] ?? true)) {
+                Log::warning("Telegram API returned ok=false [{$method}]", [
+                    'description' => $json['description'] ?? 'no description',
+                    'error_code'  => $json['error_code'] ?? null,
+                    'params'      => array_diff_key($params, ['photo' => '', 'reply_markup' => '']),
+                ]);
+            }
+
+            return $json;
         } catch (\Exception $e) {
-            Log::error("Telegram API error [{$method}]", ['message' => $e->getMessage()]);
+            Log::error("Telegram API exception [{$method}]", ['message' => $e->getMessage()]);
             return null;
         }
     }
