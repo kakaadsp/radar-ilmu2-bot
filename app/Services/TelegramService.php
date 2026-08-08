@@ -45,9 +45,26 @@ class TelegramService
 
         // Send local file vs URL
         if (file_exists($photoPathOrUrl)) {
-            $response = Http::attach('photo', file_get_contents($photoPathOrUrl), basename($photoPathOrUrl))
-                ->post("{$this->baseUrl}/sendPhoto", $payload);
-            return $response->json();
+            // Build multipart fields for all payload entries
+            $multipart = [];
+            foreach ($payload as $name => $value) {
+                $multipart[] = ['name' => $name, 'contents' => (string) $value];
+            }
+
+            $response = Http::asMultipart()
+                ->attach('photo', file_get_contents($photoPathOrUrl), basename($photoPathOrUrl))
+                ->post("{$this->baseUrl}/sendPhoto", $multipart);
+
+            $json = $response->json();
+
+            if (!($json['ok'] ?? true)) {
+                Log::warning('Telegram sendPhoto (local file) failed', [
+                    'error_code'  => $json['error_code'] ?? null,
+                    'description' => $json['description'] ?? 'no description',
+                ]);
+            }
+
+            return $json;
         }
 
         return $this->call('sendPhoto', array_merge($payload, ['photo' => $photoPathOrUrl]));

@@ -225,7 +225,7 @@ class TelegramWebhookController extends Controller
         $user = User::where('telegram_chat_id', (string) $chatId)->first();
         if (!$user) { $this->sendNotRegistered($chatId); return; }
 
-        $qrisPath = public_path('images/qris.jpg');
+        $qrisPath = public_path('images/qris.jpeg');
 
         $caption = "💳 <b>BERLANGGANAN RADAR ILMU 2</b>\n\n"
                  . "Harga: <b>Rp 5.000 / bulan</b>\n\n"
