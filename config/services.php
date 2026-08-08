@@ -38,7 +38,7 @@ return [
     // ─── Telegram Bot ──────────────────────────────────────────────────────────
     'telegram' => [
         'bot_token'      => env('TELEGRAM_BOT_TOKEN'),
-        'bot_username'   => env('TELEGRAM_BOT_USERNAME', 'Ilmu2Reminder_Bot'),
+        'bot_username'   => env('TELEGRAM_BOT_USERNAME', 'radarilmu2_bot'),
         'admin_chat_id'  => env('TELEGRAM_ADMIN_CHAT_ID'),
         'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
