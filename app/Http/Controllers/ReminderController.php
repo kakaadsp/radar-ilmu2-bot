@@ -155,15 +155,27 @@ class ReminderController extends Controller
             ]
         );
 
+        // Update task info if it changed (dosen bisa edit nama/deadline tugas)
+        if ($reminder->wasRecentlyCreated === false) {
+            $reminder->fill([
+                'task_name'       => $taskData['task_name'],
+                'course_fullname' => $taskData['course_fullname'],
+                'deadline'        => $deadline,
+                'moodle_url'      => $taskData['moodle_url'],
+            ])->save();
+        }
+
         // ── NEW TASK ALERT ────────────────────────────────────────────────────
         if (!$reminder->new_task_sent) {
             $this->telegram->sendNewTaskAlert($user, $reminder);
             $reminder->update(['new_task_sent' => true]);
             return true;
+            // H-7/H-3/H-1 akan dicek di run berikutnya (new_task_sent sudah true)
         }
 
         // ── H-7 REMINDER ─────────────────────────────────────────────────────
-        if (!$reminder->h_7_sent && $daysLeft <= 7 && $daysLeft > 3) {
+        // Range diperluas: <= 7 && > 1 agar tidak terlewat jika cron miss 1 hari
+        if (!$reminder->h_7_sent && $daysLeft <= 7 && $daysLeft > 1) {
             $this->telegram->sendH7Alert($user, $reminder);
             $reminder->update(['h_7_sent' => true]);
             return true;

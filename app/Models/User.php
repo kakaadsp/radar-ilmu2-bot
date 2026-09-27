@@ -111,11 +111,14 @@ class User extends Model
                     $sq->where('subscription_status', true)
                        ->where('subscription_expires_at', '>=', now());
                 })
-                // Or is in trial period
+                // Or is in trial period (including new users with NULL trial_started_at)
                 ->orWhere(function ($sq) {
                     $trialDays = (int) config('app.trial_days', 7);
                     $sq->where('trial_used', false)
-                       ->where('trial_started_at', '>=', now()->subDays($trialDays));
+                       ->where(function ($q) use ($trialDays) {
+                           $q->whereNull('trial_started_at')
+                             ->orWhere('trial_started_at', '>=', now()->subDays($trialDays));
+                       });
                 });
             });
     }

@@ -9,8 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // ─── Task Scheduling ──────────────────────────────────────────────────────────
-// Run Moodle check every 30 minutes
-Schedule::command('moodle:check')->everyThirtyMinutes();
-
-// Send subscription expiry warnings (3 days before)
-Schedule::command('subscriptions:warn')->daily();
+// Fallback scheduler: jika moodle:check dijalankan via artisan schedule:run
+// (Produksi menggunakan cron-job.org → GET /api/send-reminders setiap 15 menit)
+Schedule::command('moodle:check')->everyFifteenMinutes();

@@ -21,3 +21,12 @@ Route::post('/webhook/telegram', [TelegramWebhookController::class, 'handle'])
 // ─── Cron Reminder Endpoint (no CSRF, secured by token query param) ───────────
 Route::get('/api/send-reminders', [ReminderController::class, 'sendReminders'])
     ->name('cron.reminders');
+
+// ─── Keep-Alive Ping (prevents Render free plan from sleeping) ─────────────────
+Route::get('/api/ping', function () {
+    return response()->json([
+        'status' => 'ok',
+        'time'   => now()->toIso8601String(),
+        'app'    => config('app.name'),
+    ]);
+})->name('ping');
